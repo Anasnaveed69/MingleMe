@@ -11,6 +11,7 @@ const useAuthStore = create(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      pendingVerificationEmail: null, // Store email for OTP verification
 
       // Actions
       setLoading: (loading) => set({ isLoading: loading }),
@@ -19,12 +20,31 @@ const useAuthStore = create(
 
       clearError: () => set({ error: null }),
 
+      setPendingVerificationEmail: (email) => set({ pendingVerificationEmail: email }),
+
+      clearPendingVerificationEmail: () => set({ pendingVerificationEmail: null }),
+
       login: async (email, password) => {
         try {
           set({ isLoading: true, error: null });
           
           const response = await api.post('/auth/login', { email, password });
           const { token, user } = response.data.data;
+
+          // Check if user is verified
+          if (!user.isVerified) {
+            // Store email for OTP verification
+            set({ 
+              pendingVerificationEmail: email,
+              isLoading: false,
+              error: null
+            });
+            return { 
+              success: false, 
+              error: 'Account not verified. Please verify your email first.',
+              requiresVerification: true 
+            };
+          }
 
           // Set token in API headers
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -34,7 +54,8 @@ const useAuthStore = create(
             token,
             isAuthenticated: true,
             isLoading: false,
-            error: null
+            error: null,
+            pendingVerificationEmail: null // Clear pending verification
           });
 
           return { success: true };
@@ -54,12 +75,18 @@ const useAuthStore = create(
           
           const response = await api.post('/auth/signup', userData);
           
-          set({
+          // Store email for OTP verification
+          set({ 
+            pendingVerificationEmail: userData.email,
             isLoading: false,
             error: null
           });
 
-          return { success: true, data: response.data.data };
+          return { 
+            success: true, 
+            data: response.data.data,
+            requiresVerification: true 
+          };
         } catch (error) {
           const message = error.response?.data?.message || 'Signup failed';
           set({
@@ -85,7 +112,8 @@ const useAuthStore = create(
             token,
             isAuthenticated: true,
             isLoading: false,
-            error: null
+            error: null,
+            pendingVerificationEmail: null // Clear pending verification
           });
 
           return { success: true };
@@ -130,7 +158,8 @@ const useAuthStore = create(
           token: null,
           isAuthenticated: false,
           isLoading: false,
-          error: null
+          error: null,
+          pendingVerificationEmail: null
         });
       },
 
@@ -154,10 +183,17 @@ const useAuthStore = create(
           const { token } = get();
           if (!token) return false;
 
-          // Try to get user profile, but don't fail if user is not verified
+          // Try to get user profile
           try {
             const response = await api.get('/auth/profile');
             const user = response.data.data.user;
+            
+            // Check if user is verified
+            if (!user.isVerified) {
+              // User is not verified, clear auth state
+              get().logout();
+              return false;
+            }
             
             set({
               user,
@@ -166,17 +202,9 @@ const useAuthStore = create(
             });
             return true;
           } catch (profileError) {
-            // If profile fails due to verification, still consider user authenticated
-            if (profileError.response?.status === 403 && 
-                profileError.response?.data?.message?.includes('not verified')) {
-              set({
-                isAuthenticated: true,
-                error: null
-              });
-              return true;
-            }
-            // For other errors, logout
-            throw profileError;
+            // If profile fetch fails, logout
+            get().logout();
+            return false;
           }
         } catch (error) {
           // Token is invalid, logout
@@ -190,7 +218,8 @@ const useAuthStore = create(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
-        isAuthenticated: state.isAuthenticated
+        isAuthenticated: state.isAuthenticated,
+        pendingVerificationEmail: state.pendingVerificationEmail
       })
     }
   )

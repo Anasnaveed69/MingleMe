@@ -13,12 +13,12 @@ const PostDetail = () => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-xl shadow-sm border p-8 text-center"
       >
-        <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                   <div className="w-24 h-24 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
           <FileText className="text-white w-12 h-12" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Post Detail</h1>
-        <p className="text-gray-600">Post ID: {postId}</p>
-        <p className="text-gray-500 mt-4">This feature is coming soon!</p>
+                   <h1 className="text-2xl font-bold text-slate-900 mb-2">Post Detail</h1>
+           <p className="text-slate-600">Post ID: {postId}</p>
+           <p className="text-slate-500 mt-4">This feature is coming soon!</p>
       </motion.div>
     </div>
   );

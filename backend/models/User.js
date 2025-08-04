@@ -53,22 +53,34 @@ const userSchema = new mongoose.Schema({
     code: String,
     expiresAt: Date
   },
-  followers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  following: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  posts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Post'
-  }],
-  likedPosts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Post'
-  }],
+  followers: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    default: []
+  },
+  following: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    default: []
+  },
+  posts: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Post'
+    }],
+    default: []
+  },
+  likedPosts: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Post'
+    }],
+    default: []
+  },
   role: {
     type: String,
     enum: ['user', 'admin'],
@@ -95,17 +107,17 @@ userSchema.virtual('fullName').get(function() {
 
 // Virtual for follower count
 userSchema.virtual('followerCount').get(function() {
-  return this.followers.length;
+  return this.followers ? this.followers.length : 0;
 });
 
 // Virtual for following count
 userSchema.virtual('followingCount').get(function() {
-  return this.following.length;
+  return this.following ? this.following.length : 0;
 });
 
 // Virtual for post count
 userSchema.virtual('postCount').get(function() {
-  return this.posts.length;
+  return this.posts ? this.posts.length : 0;
 });
 
 // Index for search functionality
@@ -161,6 +173,7 @@ userSchema.methods.verifyOTP = function(otp) {
 
 // Method to follow a user
 userSchema.methods.follow = function(userId) {
+  if (!this.following) this.following = [];
   if (!this.following.includes(userId)) {
     this.following.push(userId);
   }
@@ -168,11 +181,13 @@ userSchema.methods.follow = function(userId) {
 
 // Method to unfollow a user
 userSchema.methods.unfollow = function(userId) {
+  if (!this.following) this.following = [];
   this.following = this.following.filter(id => id.toString() !== userId.toString());
 };
 
 // Method to like a post
 userSchema.methods.likePost = function(postId) {
+  if (!this.likedPosts) this.likedPosts = [];
   if (!this.likedPosts.includes(postId)) {
     this.likedPosts.push(postId);
   }
@@ -180,6 +195,7 @@ userSchema.methods.likePost = function(postId) {
 
 // Method to unlike a post
 userSchema.methods.unlikePost = function(postId) {
+  if (!this.likedPosts) this.likedPosts = [];
   this.likedPosts = this.likedPosts.filter(id => id.toString() !== postId.toString());
 };
 
