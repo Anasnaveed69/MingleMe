@@ -112,10 +112,51 @@ const requireOwnership = (resourceUserId) => {
   };
 };
 
+// Check if user owns the post or is admin
+const requirePostOwnership = async (req, res, next) => {
+  try {
+    const postId = req.params.id;
+    
+    if (!postId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Post ID is required'
+      });
+    }
+
+    const Post = require('../models/Post');
+    const post = await Post.findById(postId);
+    
+    if (!post) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Post not found'
+      });
+    }
+
+    if (req.user.role === 'admin' || post.author.toString() === req.user._id.toString()) {
+      req.post = post; // Add post to request for later use
+      next();
+    } else {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Access denied. You can only modify your own posts.'
+      });
+    }
+  } catch (error) {
+    console.error('Post ownership check error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Server error while checking post ownership'
+    });
+  }
+};
+
 module.exports = {
   protect,
   optionalAuth,
   requireVerification,
   requireAdmin,
-  requireOwnership
+  requireOwnership,
+  requirePostOwnership
 }; 

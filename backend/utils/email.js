@@ -47,13 +47,13 @@ const sendOTPEmail = async (email, otp, username) => {
             
             <div style="text-align: center; margin-top: 30px;">
               <p style="color: #999; font-size: 14px;">
-                Need help? Contact us at <a href="mailto:support@mingleme.com" style="color: #667eea;">support@mingleme.com</a>
+                Need help? Contact us at <a href="mailto:buttanas813@gmail.com" style="color: #667eea;">support@mingleme.com</a>
               </p>
             </div>
           </div>
           
           <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
-            <p>&copy; 2024 MingleMe. All rights reserved.</p>
+            <p>&copy; 2025 MingleMe. All rights reserved.</p>
           </div>
         </div>
       `
@@ -112,13 +112,13 @@ const sendWelcomeEmail = async (email, username) => {
             
             <div style="text-align: center; margin-top: 30px;">
               <p style="color: #999; font-size: 14px;">
-                Need help? Contact us at <a href="mailto:support@mingleme.com" style="color: #667eea;">support@mingleme.com</a>
+                Need help? Contact us at <a href="mailto:buttanas813@gmail.com" style="color: #667eea;">support@mingleme.com</a>
               </p>
             </div>
           </div>
           
           <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
-            <p>&copy; 2024 MingleMe. All rights reserved.</p>
+            <p>&copy; 2025 MingleMe. All rights reserved.</p>
           </div>
         </div>
       `
@@ -177,7 +177,7 @@ const sendPasswordResetEmail = async (email, resetToken, username) => {
           </div>
           
           <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
-            <p>&copy; 2024 MingleMe. All rights reserved.</p>
+            <p>&copy; 2025 MingleMe. All rights reserved.</p>
           </div>
         </div>
       `

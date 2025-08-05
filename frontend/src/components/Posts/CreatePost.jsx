@@ -51,6 +51,11 @@ const CreatePost = ({ onPostCreated }) => {
         toast.error('Failed to upload image');
       }
     }
+
+    // Clear the file input value so the same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const removeImage = (index) => {

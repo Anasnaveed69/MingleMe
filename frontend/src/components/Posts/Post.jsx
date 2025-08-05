@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { 
+import EditCommentModal from './EditCommentModal';
+import {
   Heart, 
   MessageCircle, 
   Share2, 
   MoreHorizontal, 
   Edit, 
   Trash2, 
-  Image as ImageIcon,
   X,
   Send,
-  ThumbsUp
+  ThumbsUp,
+  Users,
+  Eye
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
@@ -25,7 +27,9 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
     addCommentAction, 
     deleteCommentAction,
     likeCommentAction,
-    unlikeCommentAction
+    unlikeCommentAction,
+    getPostLikesAction,
+    editCommentAction
   } = usePostsStore();
 
   const [showComments, setShowComments] = useState(false);
@@ -33,9 +37,47 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [showLikesModal, setShowLikesModal] = useState(false);
+  const [likesData, setLikesData] = useState(null);
+  const [loadingLikes, setLoadingLikes] = useState(false);
+  const [showPostMenu, setShowPostMenu] = useState(false);
+  const [showEditCommentModal, setShowEditCommentModal] = useState(false);
+  const [selectedComment, setSelectedComment] = useState(null);
+  const menuRef = useRef(null);
 
-  const isOwnPost = user?._id === post.author._id;
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowPostMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Safety check for incomplete post data
+  if (!post || !post._id) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm border p-4">
+        <div className="text-center text-slate-500">
+          <p>Post data is incomplete or unavailable.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fix ownership check - compare string IDs properly
+  // Backend returns user.id, not user._id
+  const isOwnPost = user?.id?.toString() === post.author?._id?.toString();
   const isLiked = post.isLiked || false;
+
+
+
+
 
   const handleLike = async () => {
     if (!user) {
@@ -81,6 +123,17 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
     }
   };
 
+  const handleEditComment = async (comment) => {
+    setSelectedComment(comment);
+    setShowEditCommentModal(true);
+  };
+
+  const handleCommentUpdated = () => {
+    // The comment will be updated automatically through the store
+    setShowEditCommentModal(false);
+    setSelectedComment(null);
+  };
+
   const handleLikeComment = async (commentId) => {
     if (!user) {
       toast.error('Please login to like comments');
@@ -104,13 +157,28 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `${post.author.firstName} ${post.author.lastName}'s post`,
+        title: `${post.author?.firstName || 'User'} ${post.author?.lastName || ''}'s post`,
         text: post.content,
         url: window.location.href
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
       toast.success('Link copied to clipboard!');
+    }
+  };
+
+  const handleShowLikes = async () => {
+    if (!post.likeCount || post.likeCount === 0) return;
+    
+    setLoadingLikes(true);
+    try {
+      const response = await getPostLikesAction(post._id);
+      setLikesData(response);
+      setShowLikesModal(true);
+    } catch (error) {
+      console.error('Get likes error:', error);
+    } finally {
+      setLoadingLikes(false);
     }
   };
 
@@ -141,68 +209,82 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
         <div className="p-4 border-b border-slate-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Link to={`/profile/${post.author._id}`}>
+              <Link to={`/profile/${post.author?._id || 'unknown'}`}>
                 <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center">
-                  {post.author.avatar ? (
+                  {post.author?.avatar ? (
                     <img 
                       src={post.author.avatar} 
-                      alt={post.author.firstName}
+                      alt={post.author?.firstName || 'User'}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
                     <span className="text-white font-bold">
-                      {post.author.firstName[0]}
+                      {post.author?.firstName?.[0] || 'U'}
                     </span>
                   )}
                 </div>
               </Link>
               <div>
-                <Link to={`/profile/${post.author._id}`}>
+                <Link to={`/profile/${post.author?._id || 'unknown'}`}>
                   <h3 className="font-semibold text-slate-900 hover:text-indigo-600 transition-colors">
-                    {post.author.firstName} {post.author.lastName}
+                    {post.author?.firstName || 'Unknown'} {post.author?.lastName || 'User'}
                   </h3>
                 </Link>
                 <p className="text-sm text-slate-500">
-                  @{post.author.username} • {formatTimeAgo(post.createdAt)}
+                  @{post.author?.username || 'unknown'} • {formatTimeAgo(post.createdAt)}
                   {post.isEdited && <span className="ml-1 text-slate-400">(edited)</span>}
                 </p>
               </div>
             </div>
             
             {/* Post Actions Menu */}
-            <div className="relative">
-              <button className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors">
+            <div className="relative" ref={menuRef}>
+              <button 
+                onClick={() => setShowPostMenu(!showPostMenu)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors"
+              >
                 <MoreHorizontal className="w-5 h-5" />
               </button>
               
               {/* Dropdown Menu */}
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-10 hidden group-hover:block">
-                {isOwnPost && (
-                  <>
-                    <button
-                      onClick={() => onPostUpdate(post)}
-                      className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
-                    >
-                      <Edit className="w-4 h-4" />
-                      <span>Edit Post</span>
-                    </button>
-                    <button
-                      onClick={() => onPostDelete(post._id)}
-                      className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete Post</span>
-                    </button>
-                  </>
-                )}
-                <button
-                  onClick={handleShare}
-                  className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                  <Share2 className="w-4 h-4" />
-                  <span>Share Post</span>
-                </button>
-              </div>
+              {showPostMenu && (
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-10">
+                  {isOwnPost && (
+                    <>
+                      <button
+                        onClick={() => {
+                          onPostUpdate(post);
+                          setShowPostMenu(false);
+                        }}
+                        className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span>Edit Post</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onPostDelete(post._id);
+                          setShowPostMenu(false);
+                        }}
+                        className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>Delete Post</span>
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => {
+                      handleShare();
+                      setShowPostMenu(false);
+                    }}
+                    className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share Post</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -296,6 +378,18 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
                 <span className="text-sm">Share</span>
               </button>
             </div>
+
+            {/* Who liked button (Instagram-like) */}
+            {post.likeCount > 0 && (
+              <button
+                onClick={handleShowLikes}
+                disabled={loadingLikes}
+                className="flex items-center space-x-1 text-xs text-slate-500 hover:text-indigo-600 transition-colors disabled:opacity-50"
+              >
+                <Users className="w-3 h-3" />
+                <span>Who liked</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -334,28 +428,31 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
                   <div key={comment._id} className="p-4 border-b border-slate-50 last:border-b-0">
                     <div className="flex items-start space-x-3">
                       <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        {comment.user.avatar ? (
+                        {comment.user?.avatar ? (
                           <img 
                             src={comment.user.avatar} 
-                            alt={comment.user.firstName}
+                            alt={comment.user?.firstName || 'User'}
                             className="w-8 h-8 rounded-full object-cover"
                           />
                         ) : (
                           <span className="text-white text-xs font-bold">
-                            {comment.user.firstName[0]}
+                            {comment.user?.firstName?.[0] || 'U'}
                           </span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2 mb-1">
                           <span className="text-sm font-medium text-slate-900">
-                            {comment.user.firstName} {comment.user.lastName}
+                            {comment.user?.firstName || 'Unknown'} {comment.user?.lastName || 'User'}
                           </span>
                           <span className="text-xs text-slate-500">
                             {formatTimeAgo(comment.createdAt)}
+                            {comment.isEdited && <span className="ml-1">(edited)</span>}
                           </span>
                         </div>
+                        
                         <p className="text-sm text-slate-700 mb-2">{comment.content}</p>
+                        
                         <div className="flex items-center space-x-4">
                           <button
                             onClick={() => handleLikeComment(comment._id)}
@@ -369,14 +466,26 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
                             <span>{comment.likeCount || 0}</span>
                           </button>
                           
-                          {user?._id === comment.user._id && (
-                            <button
-                              onClick={() => handleDeleteComment(comment._id)}
-                              className="text-xs text-red-500 hover:text-red-700 transition-colors"
-                            >
-                              Delete
-                            </button>
+                                                    {(user?.id?.toString() === comment.user?._id?.toString() || user?.id?.toString() === post.author?._id?.toString()) && (
+                            <div className="flex space-x-2">
+                              {user?.id?.toString() === comment.user?._id?.toString() && (
+                                <button
+                                  onClick={() => handleEditComment(comment)}
+                                  className="text-xs text-indigo-500 hover:text-indigo-700 transition-colors"
+                                >
+                                  Edit
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeleteComment(comment._id)}
+                                className="text-xs text-red-500 hover:text-red-700 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           )}
+
+
                         </div>
                       </div>
                     </div>
@@ -410,6 +519,63 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
           </div>
         </div>
       )}
+
+      {/* Likes Modal */}
+      {showLikesModal && likesData && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-96 overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-900">Likes</h3>
+              <button
+                onClick={() => setShowLikesModal(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="max-h-80 overflow-y-auto">
+              {likesData.likes.map((user) => (
+                <div key={user._id} className="flex items-center space-x-3 p-4 hover:bg-slate-50">
+                  <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center">
+                    {user.avatar ? (
+                      <img 
+                        src={user.avatar} 
+                        alt={user.firstName}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white font-bold">
+                        {user.firstName?.[0] || 'U'}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <Link 
+                      to={`/profile/${user._id}`}
+                      className="font-medium text-slate-900 hover:text-indigo-600 transition-colors"
+                    >
+                      {user.firstName} {user.lastName}
+                    </Link>
+                    <p className="text-sm text-slate-500">@{user.username}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Comment Modal */}
+      <EditCommentModal
+        comment={selectedComment}
+        postId={post._id}
+        isOpen={showEditCommentModal}
+        onClose={() => {
+          setShowEditCommentModal(false);
+          setSelectedComment(null);
+        }}
+        onCommentUpdated={handleCommentUpdated}
+      />
     </>
   );
 };

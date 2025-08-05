@@ -1,9 +1,32 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const { protect, requireVerification, requireOwnership } = require('../middleware/auth');
+const Post = require('../models/Post'); // Added Post model import
 
 const router = express.Router();
+
+// Helper function to create notifications
+const createNotification = async (recipientId, senderId, type, message, postId = null, commentId = null) => {
+  try {
+    // Don't create notification if sender is the same as recipient
+    if (recipientId.toString() === senderId.toString()) {
+      return;
+    }
+
+    await Notification.create({
+      recipient: recipientId,
+      sender: senderId,
+      type,
+      message,
+      post: postId,
+      commentId: commentId
+    });
+  } catch (error) {
+    console.error('Error creating notification:', error);
+  }
+};
 
 // @route   GET /api/users
 // @desc    Get all users (with search and pagination)
@@ -114,6 +137,80 @@ router.get('/:id', protect, requireVerification, async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Server error while fetching user'
+    });
+  }
+});
+
+// @route   GET /api/users/:id/posts
+// @desc    Get user posts with pagination
+// @access  Private
+router.get('/:id/posts', protect, requireVerification, async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    if (!user.isActive) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    // Get user's posts with pagination
+    const posts = await Post.find({ 
+      author: req.params.id, 
+      isDeleted: false 
+    })
+      .populate('author', 'username firstName lastName avatar')
+      .populate('likes', 'username firstName lastName avatar')
+      .populate('comments.user', 'username firstName lastName avatar')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    const total = await Post.countDocuments({ 
+      author: req.params.id, 
+      isDeleted: false 
+    });
+
+    // Add isLiked field to posts
+    const postsWithLikeStatus = posts.map(post => ({
+      ...post,
+      isLiked: post.likes.some(like => like._id.toString() === req.user._id.toString()),
+      likeCount: post.likes.length,
+      commentCount: post.comments.length,
+      comments: post.comments.map(comment => ({
+        ...comment,
+        isLiked: comment.likes.some(like => like._id.toString() === req.user._id.toString()),
+        likeCount: comment.likes.length
+      }))
+    }));
+
+    res.json({
+      status: 'success',
+      data: {
+        posts: postsWithLikeStatus,
+        total,
+        page: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        hasNext: skip + parseInt(limit) < total,
+        hasPrev: parseInt(page) > 1
+      }
+    });
+  } catch (error) {
+    console.error('Get user posts error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error while fetching user posts'
     });
   }
 });
@@ -235,6 +332,14 @@ router.post('/:id/follow', protect, requireVerification, async (req, res) => {
     userToFollow.followers.push(req.user._id);
 
     await Promise.all([req.user.save(), userToFollow.save()]);
+
+    // Create notification for follow
+    await createNotification(
+      userToFollow._id,
+      req.user._id,
+      'follow',
+      `started following you`
+    );
 
     res.json({
       status: 'success',

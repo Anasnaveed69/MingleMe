@@ -11,6 +11,8 @@ import {
   deleteComment,
   likeComment,
   unlikeComment,
+  getPostLikes,
+  editComment,
   getUserPosts,
   uploadImage,
   searchPosts
@@ -156,24 +158,24 @@ const usePostsStore = create((set, get) => ({
   // Like a post
   likePostAction: async (postId) => {
     try {
-      await likePost(postId);
+      const response = await likePost(postId);
       
-      // Update the post in the posts array
+      // Update the post in the posts array using response data
       set(state => ({
         posts: state.posts.map(post => {
           if (post._id === postId) {
             return {
               ...post,
-              isLiked: true,
-              likeCount: post.likeCount + 1
+              isLiked: response.data.isLiked,
+              likeCount: response.data.likeCount
             };
           }
           return post;
         }),
         currentPost: state.currentPost?._id === postId ? {
           ...state.currentPost,
-          isLiked: true,
-          likeCount: state.currentPost.likeCount + 1
+          isLiked: response.data.isLiked,
+          likeCount: response.data.likeCount
         } : state.currentPost
       }));
     } catch (error) {
@@ -185,24 +187,24 @@ const usePostsStore = create((set, get) => ({
   // Unlike a post
   unlikePostAction: async (postId) => {
     try {
-      await unlikePost(postId);
+      const response = await unlikePost(postId);
       
-      // Update the post in the posts array
+      // Update the post in the posts array using response data
       set(state => ({
         posts: state.posts.map(post => {
           if (post._id === postId) {
             return {
               ...post,
-              isLiked: false,
-              likeCount: Math.max(0, post.likeCount - 1)
+              isLiked: response.data.isLiked,
+              likeCount: response.data.likeCount
             };
           }
           return post;
         }),
         currentPost: state.currentPost?._id === postId ? {
           ...state.currentPost,
-          isLiked: false,
-          likeCount: Math.max(0, state.currentPost.likeCount - 1)
+          isLiked: response.data.isLiked,
+          likeCount: response.data.likeCount
         } : state.currentPost
       }));
     } catch (error) {
@@ -277,9 +279,9 @@ const usePostsStore = create((set, get) => ({
   // Like a comment
   likeCommentAction: async (postId, commentId) => {
     try {
-      await likeComment(postId, commentId);
+      const response = await likeComment(postId, commentId);
       
-      // Update the comment in the posts array
+      // Update the comment in the posts array using response data
       set(state => ({
         posts: state.posts.map(post => {
           if (post._id === postId) {
@@ -289,8 +291,8 @@ const usePostsStore = create((set, get) => ({
                 if (comment._id === commentId) {
                   return {
                     ...comment,
-                    isLiked: true,
-                    likeCount: comment.likeCount + 1
+                    isLiked: response.data.isLiked,
+                    likeCount: response.data.likeCount
                   };
                 }
                 return comment;
@@ -298,7 +300,20 @@ const usePostsStore = create((set, get) => ({
             };
           }
           return post;
-        })
+        }),
+        currentPost: state.currentPost?._id === postId ? {
+          ...state.currentPost,
+          comments: state.currentPost.comments.map(comment => {
+            if (comment._id === commentId) {
+              return {
+                ...comment,
+                isLiked: response.data.isLiked,
+                likeCount: response.data.likeCount
+              };
+            }
+            return comment;
+          })
+        } : state.currentPost
       }));
     } catch (error) {
       toast.error(error.message);
@@ -309,7 +324,64 @@ const usePostsStore = create((set, get) => ({
   // Unlike a comment
   unlikeCommentAction: async (postId, commentId) => {
     try {
-      await unlikeComment(postId, commentId);
+      const response = await unlikeComment(postId, commentId);
+      
+      // Update the comment in the posts array using response data
+      set(state => ({
+        posts: state.posts.map(post => {
+          if (post._id === postId) {
+            return {
+              ...post,
+              comments: post.comments.map(comment => {
+                if (comment._id === commentId) {
+                  return {
+                    ...comment,
+                    isLiked: response.data.isLiked,
+                    likeCount: response.data.likeCount
+                  };
+                }
+                return comment;
+              })
+            };
+          }
+          return post;
+        }),
+        currentPost: state.currentPost?._id === postId ? {
+          ...state.currentPost,
+          comments: state.currentPost.comments.map(comment => {
+            if (comment._id === commentId) {
+              return {
+                ...comment,
+                isLiked: response.data.isLiked,
+                likeCount: response.data.likeCount
+              };
+            }
+            return comment;
+          })
+        } : state.currentPost
+      }));
+    } catch (error) {
+      toast.error(error.message);
+      console.error('Unlike comment error:', error);
+    }
+  },
+
+  // Get post likes (who liked the post)
+  getPostLikesAction: async (postId) => {
+    try {
+      const response = await getPostLikes(postId);
+      return response.data;
+    } catch (error) {
+      toast.error(error.message);
+      console.error('Get post likes error:', error);
+      throw error;
+    }
+  },
+
+  // Edit a comment
+  editCommentAction: async (postId, commentId, content) => {
+    try {
+      const response = await editComment(postId, commentId, content);
       
       // Update the comment in the posts array
       set(state => ({
@@ -321,8 +393,9 @@ const usePostsStore = create((set, get) => ({
                 if (comment._id === commentId) {
                   return {
                     ...comment,
-                    isLiked: false,
-                    likeCount: Math.max(0, comment.likeCount - 1)
+                    content: response.data.comment.content,
+                    isEdited: response.data.comment.isEdited,
+                    editedAt: response.data.comment.editedAt
                   };
                 }
                 return comment;
@@ -330,11 +403,28 @@ const usePostsStore = create((set, get) => ({
             };
           }
           return post;
-        })
+        }),
+        currentPost: state.currentPost?._id === postId ? {
+          ...state.currentPost,
+          comments: state.currentPost.comments.map(comment => {
+            if (comment._id === commentId) {
+              return {
+                ...comment,
+                content: response.data.comment.content,
+                isEdited: response.data.comment.isEdited,
+                editedAt: response.data.comment.editedAt
+              };
+            }
+            return comment;
+          })
+        } : state.currentPost
       }));
+      
+      toast.success('Comment updated successfully!');
+      return response.data.comment;
     } catch (error) {
       toast.error(error.message);
-      console.error('Unlike comment error:', error);
+      throw error;
     }
   },
 

@@ -18,6 +18,9 @@ import Feed from './pages/Feed/Feed';
 import Profile from './pages/Profile/Profile';
 import UserProfile from './pages/Profile/UserProfile';
 import PostDetail from './pages/Posts/PostDetail';
+import CreatePost from './pages/CreatePost/CreatePost';
+import Search from './pages/Search/Search';
+import Notifications from './pages/Notifications/Notifications';
 import NotFound from './pages/NotFound';
 
 // Loading component
@@ -201,6 +204,56 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            
+            <Route 
+              path="/create-post" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <CreatePost />
+                    </motion.div>
+                  </Layout>
+                </ProtectedRoute>
+              } 
+            />
+            
+                    <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Search />
+                </motion.div>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Notifications />
+                </motion.div>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
             {/* Default redirect */}
             <Route 

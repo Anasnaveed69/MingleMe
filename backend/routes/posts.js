@@ -2,9 +2,31 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const Post = require('../models/Post');
 const User = require('../models/User');
-const { protect, requireVerification, requireOwnership } = require('../middleware/auth');
+const Notification = require('../models/Notification');
+const { protect, requireVerification, requireOwnership, requirePostOwnership } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Helper function to create notifications
+const createNotification = async (recipientId, senderId, type, message, postId = null, commentId = null) => {
+  try {
+    // Don't create notification if sender is the same as recipient
+    if (recipientId.toString() === senderId.toString()) {
+      return;
+    }
+
+    await Notification.create({
+      recipient: recipientId,
+      sender: senderId,
+      type,
+      message,
+      post: postId,
+      commentId: commentId
+    });
+  } catch (error) {
+    console.error('Error creating notification:', error);
+  }
+};
 
 // @route   GET /api/posts
 // @desc    Get all posts (with pagination and search)
@@ -20,11 +42,22 @@ router.get('/', protect, requireVerification, async (req, res) => {
       result = await Post.getPosts(parseInt(page), parseInt(limit), req.user._id);
     }
 
-    // Add isLiked field to each post
-    const postsWithLikeStatus = result.posts.map(post => ({
-      ...post,
-      isLiked: post.likes.some(like => like._id.toString() === req.user._id.toString())
-    }));
+    // Filter out posts with missing author data and add isLiked field to each post and comment
+    const postsWithLikeStatus = result.posts
+      .filter(post => post.author && post.author._id) // Filter out posts with missing author
+      .map(post => ({
+        ...post,
+        isLiked: post.likes.some(like => like._id.toString() === req.user._id.toString()),
+        likeCount: post.likes.length, // Ensure likeCount is included
+        commentCount: post.comments.length, // Ensure commentCount is included
+        comments: post.comments
+          .filter(comment => comment.user && comment.user._id) // Filter out comments with missing user
+          .map(comment => ({
+            ...comment,
+            isLiked: comment.likes.some(like => like._id.toString() === req.user._id.toString()),
+            likeCount: comment.likes.length // Ensure comment likeCount is included
+          }))
+      }));
 
     res.json({
       status: 'success',
@@ -144,6 +177,14 @@ router.get('/:id', protect, requireVerification, async (req, res) => {
       });
     }
 
+    // Check if post has valid author data
+    if (!post.author || !post.author._id) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Post author data is invalid'
+      });
+    }
+
     // Check if user can view this post
     if (!post.isPublic && post.author._id.toString() !== req.user._id.toString()) {
       return res.status(403).json({
@@ -152,8 +193,15 @@ router.get('/:id', protect, requireVerification, async (req, res) => {
       });
     }
 
-    // Add isLiked field
+    // Add isLiked field for post and comments (with safety checks)
     const isLiked = post.likes.some(like => like._id.toString() === req.user._id.toString());
+    const commentsWithLikeStatus = post.comments
+      .filter(comment => comment.user && comment.user._id) // Filter out comments with missing user
+      .map(comment => ({
+        ...comment,
+        isLiked: comment.likes.some(like => like._id.toString() === req.user._id.toString()),
+        likeCount: comment.likes.length // Ensure comment likeCount is included
+      }));
 
     res.json({
       status: 'success',
@@ -165,7 +213,7 @@ router.get('/:id', protect, requireVerification, async (req, res) => {
           tags: post.tags,
           author: post.author,
           likes: post.likes,
-          comments: post.comments,
+          comments: commentsWithLikeStatus,
           likeCount: post.likeCount,
           commentCount: post.commentCount,
           isLiked,
@@ -192,7 +240,7 @@ router.get('/:id', protect, requireVerification, async (req, res) => {
 router.put('/:id', [
   protect,
   requireVerification,
-  requireOwnership('id'),
+  requirePostOwnership,
   body('content')
     .notEmpty()
     .withMessage('Post content is required')
@@ -216,20 +264,7 @@ router.put('/:id', [
 
     const { content, images, tags } = req.body;
 
-    const post = await Post.findById(req.params.id);
-    if (!post) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Post not found'
-      });
-    }
-
-    if (post.isDeleted) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Post not found'
-      });
-    }
+    const post = req.post; // Use post from middleware
 
     // Update post
     post.content = content;
@@ -274,23 +309,10 @@ router.put('/:id', [
 router.delete('/:id', [
   protect,
   requireVerification,
-  requireOwnership('id')
+  requirePostOwnership
 ], async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-    if (!post) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Post not found'
-      });
-    }
-
-    if (post.isDeleted) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Post not found'
-      });
-    }
+    const post = req.post; // Use post from middleware
 
     // Soft delete the post
     post.isDeleted = true;
@@ -334,19 +356,29 @@ router.post('/:id/like', protect, requireVerification, async (req, res) => {
       });
     }
 
-    const isLiked = post.likes.includes(req.user._id);
+    const isLiked = post.likes.some(like => like.toString() === req.user._id.toString());
 
     if (isLiked) {
       // Unlike the post
       post.unlike(req.user._id);
-      req.user.unlikePost(post._id);
     } else {
       // Like the post
       post.like(req.user._id);
-      req.user.likePost(post._id);
+      
+      // Create notification for like
+      await createNotification(
+        post.author,
+        req.user._id,
+        'like',
+        `liked your post`,
+        post._id
+      );
     }
 
-    await Promise.all([post.save(), req.user.save()]);
+    await post.save();
+
+    // Populate likes to get user details
+    await post.populate('likes', 'username firstName lastName avatar');
 
     res.json({
       status: 'success',
@@ -409,9 +441,19 @@ router.post('/:id/comments', [
     post.addComment(req.user._id, content);
     await post.save();
 
-    // Populate the new comment
+    // Populate the new comment properly
+    await post.populate('comments.user', 'username firstName lastName avatar');
     const newComment = post.comments[post.comments.length - 1];
-    await newComment.populate('user', 'username firstName lastName avatar');
+
+    // Create notification for comment
+    await createNotification(
+      post.author,
+      req.user._id,
+      'comment',
+      `commented on your post`,
+      post._id,
+      newComment._id.toString()
+    );
 
     res.status(201).json({
       status: 'success',
@@ -422,6 +464,7 @@ router.post('/:id/comments', [
           content: newComment.content,
           user: newComment.user,
           likeCount: newComment.likeCount,
+          isLiked: false, // New comments are not liked by default
           createdAt: newComment.createdAt
         },
         commentCount: post.commentCount
@@ -432,6 +475,99 @@ router.post('/:id/comments', [
     res.status(500).json({
       status: 'error',
       message: 'Server error while adding comment'
+    });
+  }
+});
+
+// @route   PUT /api/posts/:id/comments/:commentId
+// @desc    Edit a comment
+// @access  Private (comment owner only)
+router.put('/:id/comments/:commentId', [
+  protect,
+  requireVerification,
+  body('content')
+    .notEmpty()
+    .withMessage('Comment content is required')
+    .isLength({ max: 1000 })
+    .withMessage('Comment cannot exceed 1000 characters')
+], async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { id: postId, commentId } = req.params;
+    const { content } = req.body;
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Post not found'
+      });
+    }
+
+    if (post.isDeleted) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Post not found'
+      });
+    }
+
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Comment not found'
+      });
+    }
+
+    // Check if user owns the comment
+    if (comment.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Access denied. You can only edit your own comments.'
+      });
+    }
+
+    // Update comment
+    comment.content = content;
+    comment.isEdited = true;
+    comment.editedAt = new Date();
+    
+    await post.save();
+
+    // Populate the updated comment
+    await post.populate('comments.user', 'username firstName lastName avatar');
+    const updatedComment = post.comments.id(commentId);
+
+    res.json({
+      status: 'success',
+      message: 'Comment updated successfully',
+      data: {
+        comment: {
+          id: updatedComment._id,
+          content: updatedComment.content,
+          user: updatedComment.user,
+          likeCount: updatedComment.likeCount,
+          isLiked: updatedComment.likes.some(like => like.toString() === req.user._id.toString()),
+          isEdited: updatedComment.isEdited,
+          editedAt: updatedComment.editedAt,
+          createdAt: updatedComment.createdAt
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Edit comment error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error while editing comment'
     });
   }
 });
@@ -497,6 +633,44 @@ router.delete('/:id/comments/:commentId', protect, requireVerification, async (r
   }
 });
 
+// @route   GET /api/posts/:id/likes
+// @desc    Get who liked a post
+// @access  Private
+router.get('/:id/likes', protect, requireVerification, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate('likes', 'username firstName lastName avatar');
+
+    if (!post) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Post not found'
+      });
+    }
+
+    if (post.isDeleted) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Post not found'
+      });
+    }
+
+    res.json({
+      status: 'success',
+      data: {
+        likes: post.likes,
+        totalLikes: post.likes.length
+      }
+    });
+  } catch (error) {
+    console.error('Get post likes error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error while fetching post likes'
+    });
+  }
+});
+
 // @route   POST /api/posts/:id/comments/:commentId/like
 // @desc    Like/unlike a comment
 // @access  Private
@@ -527,7 +701,7 @@ router.post('/:id/comments/:commentId/like', protect, requireVerification, async
       });
     }
 
-    const isLiked = comment.likes.includes(req.user._id);
+    const isLiked = comment.likes.some(like => like.toString() === req.user._id.toString());
 
     if (isLiked) {
       // Unlike the comment
@@ -539,12 +713,16 @@ router.post('/:id/comments/:commentId/like', protect, requireVerification, async
 
     await post.save();
 
+    // Get the updated comment to get the correct like count
+    const updatedComment = post.comments.id(commentId);
+
     res.json({
       status: 'success',
       message: isLiked ? 'Comment unliked' : 'Comment liked',
       data: {
         isLiked: !isLiked,
-        likeCount: comment.likes.length
+        likeCount: updatedComment.likes.length,
+        commentId: commentId
       }
     });
   } catch (error) {

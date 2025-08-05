@@ -3,13 +3,13 @@ import { motion } from 'framer-motion';
 import { 
   Search, 
   Loader2, 
-  Filter,
   RefreshCw
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import usePostsStore from '../../store/postsStore';
 import CreatePost from '../../components/Posts/CreatePost';
 import Post from '../../components/Posts/Post';
+import EditPostModal from '../../components/Posts/EditPostModal';
 import GradientBackground from '../../components/ui/GradientBackground';
 import toast from 'react-hot-toast';
 
@@ -20,14 +20,15 @@ const Feed = () => {
     loading, 
     pagination, 
     fetchPosts, 
-    deleteExistingPost,
-    updateExistingPost
+    deleteExistingPost
   } = usePostsStore();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -71,9 +72,14 @@ const Feed = () => {
   };
 
   const handlePostUpdate = async (post) => {
-    // This would typically open an edit modal
-    // For now, we'll just show a toast
-    toast.success('Edit functionality coming soon!');
+    setEditingPost(post);
+    setShowEditModal(true);
+  };
+
+  const handlePostUpdated = () => {
+    // Refresh the feed to show the updated post
+    setCurrentPage(1);
+    fetchPosts(1, 10, searchTerm);
   };
 
   if (!user) {
@@ -148,14 +154,16 @@ const Feed = () => {
             </div>
           ) : posts.length > 0 ? (
             <>
-              {posts.map((post) => (
-                <Post
-                  key={post._id}
-                  post={post}
-                  onPostUpdate={handlePostUpdate}
-                  onPostDelete={handlePostDelete}
-                />
-              ))}
+              {posts
+                .filter(post => post && post._id && post.author) // Filter out incomplete posts
+                .map((post) => (
+                  <Post
+                    key={post._id}
+                    post={post}
+                    onPostUpdate={handlePostUpdate}
+                    onPostDelete={handlePostDelete}
+                  />
+                ))}
               
               {/* Load More Button */}
               {pagination.hasNext && (
@@ -227,6 +235,17 @@ const Feed = () => {
             )}
           </div>
         )}
+
+        {/* Edit Post Modal */}
+        <EditPostModal
+          post={editingPost}
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingPost(null);
+          }}
+          onPostUpdated={handlePostUpdated}
+        />
       </div>
     </GradientBackground>
   );

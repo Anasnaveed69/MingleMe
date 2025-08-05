@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { 
   Home, 
   User, 
@@ -13,21 +14,30 @@ import {
   Bell
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
+import useNotificationStore from '../../store/notificationStore';
+import NotificationDropdown from '../Notifications/NotificationDropdown';
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuthStore();
+  const { fetchUnreadCount } = useNotificationStore();
   const location = useLocation();
 
   const navigation = [
     { name: 'Feed', href: '/feed', icon: Home },
     { name: 'Profile', href: '/profile', icon: User },
     { name: 'Search', href: '/search', icon: Search },
+    { name: 'Notifications', href: '/notifications', icon: Bell },
   ];
 
   const handleLogout = () => {
     logout();
   };
+
+  // Fetch unread count on mount
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount]);
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -193,9 +203,7 @@ const Layout = ({ children }) => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <button className="p-2 rounded-lg hover:bg-slate-100">
-                <Bell className="w-5 h-5 text-slate-600" />
-              </button>
+              <NotificationDropdown />
               <Link
                 to="/create-post"
                 className="bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 text-white px-4 py-2 rounded-lg font-medium hover:from-indigo-700 hover:via-purple-700 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 shadow-lg flex items-center"

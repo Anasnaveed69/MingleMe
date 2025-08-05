@@ -68,7 +68,7 @@ export const likePost = async (postId) => {
 // Unlike a post
 export const unlikePost = async (postId) => {
   try {
-    const response = await api.delete(`/posts/${postId}/like`);
+    const response = await api.post(`/posts/${postId}/like`);
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to unlike post');
@@ -108,10 +108,30 @@ export const likeComment = async (postId, commentId) => {
 // Unlike a comment
 export const unlikeComment = async (postId, commentId) => {
   try {
-    const response = await api.delete(`/posts/${postId}/comments/${commentId}/like`);
+    const response = await api.post(`/posts/${postId}/comments/${commentId}/like`);
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to unlike comment');
+  }
+};
+
+// Get who liked a post
+export const getPostLikes = async (postId) => {
+  try {
+    const response = await api.get(`/posts/${postId}/likes`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch post likes');
+  }
+};
+
+// Edit a comment
+export const editComment = async (postId, commentId, content) => {
+  try {
+    const response = await api.put(`/posts/${postId}/comments/${commentId}`, { content });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to edit comment');
   }
 };
 
@@ -154,7 +174,7 @@ export const searchPosts = async (searchTerm, page = 1, limit = 10) => {
     if (page) params.append('page', page);
     if (limit) params.append('limit', limit);
 
-    const response = await api.get(`/posts/search?${params.toString()}`);
+    const response = await api.get(`/posts?${params.toString()}`);
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to search posts');
