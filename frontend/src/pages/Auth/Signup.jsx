@@ -5,6 +5,7 @@ import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import toast from 'react-hot-toast';
 import GradientBackground from '../../components/ui/GradientBackground';
+import ChatBubbleIcon from '../../components/ui/ChatBubbleIcon';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -96,9 +97,18 @@ const Signup = () => {
       
       if (result.success) {
         toast.success('Account created successfully! Please check your email for verification.');
-        navigate('/verify-otp');
+        // Add a small delay to ensure proper navigation
+        setTimeout(() => {
+          navigate('/verify-otp', { replace: true });
+        }, 100);
+      } else if (result.requiresVerification) {
+        // Handle case where verification is required
+        toast.success('Account created successfully! Please check your email for verification.');
+        setTimeout(() => {
+          navigate('/verify-otp', { replace: true });
+        }, 100);
       } else {
-        toast.error(result.error);
+        toast.error(result.error || 'Signup failed');
       }
     } catch (error) {
       console.error('Signup error:', error);
@@ -117,7 +127,7 @@ const Signup = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">M</span>
+            <ChatBubbleIcon size={32} animate={true} />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Join MingleMe</h1>
           <p className="text-slate-600">Create your account to get started</p>
@@ -334,4 +344,4 @@ const Signup = () => {
   );
 };
 
-export default Signup; 
+export default Signup;

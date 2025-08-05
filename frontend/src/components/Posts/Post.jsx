@@ -209,7 +209,7 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
         <div className="p-4 border-b border-slate-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Link to={`/profile/${post.author?._id || 'unknown'}`}>
+              <Link to={`/user/${post.author?._id || 'unknown'}`}>
                 <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center">
                   {post.author?.avatar ? (
                     <img 
@@ -225,7 +225,7 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
                 </div>
               </Link>
               <div>
-                <Link to={`/profile/${post.author?._id || 'unknown'}`}>
+                <Link to={`/user/${post.author?._id || 'unknown'}`}>
                   <h3 className="font-semibold text-slate-900 hover:text-indigo-600 transition-colors">
                     {post.author?.firstName || 'Unknown'} {post.author?.lastName || 'User'}
                   </h3>

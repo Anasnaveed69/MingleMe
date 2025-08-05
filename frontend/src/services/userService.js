@@ -47,6 +47,43 @@ export const uploadAvatar = async (file) => {
   }
 };
 
+// Upload cover photo
+export const uploadCoverPhoto = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('coverPhoto', file);
+    
+    const response = await api.post('/upload/cover-photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to upload cover photo');
+  }
+};
+
+// Remove avatar
+export const removeAvatar = async () => {
+  try {
+    const response = await api.delete('/upload/avatar');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to remove avatar');
+  }
+};
+
+// Remove cover photo
+export const removeCoverPhoto = async () => {
+  try {
+    const response = await api.delete('/upload/cover-photo');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to remove cover photo');
+  }
+};
+
 // Follow user
 export const followUser = async (userId) => {
   try {

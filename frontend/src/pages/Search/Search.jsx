@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search as SearchIcon, Users, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import usePostsStore from '../../store/postsStore';
 import useUsersStore from '../../store/usersStore';
 import useAuthStore from '../../store/authStore';
@@ -91,62 +92,68 @@ const Search = () => {
     </motion.div>
   );
 
-  const renderUserResult = (user) => (
-    <motion.div
-      key={user.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg shadow-sm border p-4 mb-4 hover:shadow-md transition-shadow"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center">
-            {user.avatar ? (
-              <img 
-                src={user.avatar} 
-                alt={user.firstName}
-                className="w-12 h-12 rounded-full object-cover"
-              />
-            ) : (
-              <span className="text-white font-bold text-lg">
-                {user.firstName?.[0]}
-              </span>
-            )}
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-semibold text-slate-900">
-                {user.firstName} {user.lastName}
-              </span>
-              {user.isVerified && (
-                <span className="text-blue-500">✓</span>
+  const renderUserResult = (searchUser) => (
+    <Link to={`/user/${searchUser._id || searchUser.id}`} key={searchUser._id || searchUser.id}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-lg shadow-sm border p-4 mb-4 hover:shadow-md transition-shadow cursor-pointer"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center">
+              {searchUser.avatar ? (
+                <img 
+                  src={searchUser.avatar} 
+                  alt={searchUser.firstName}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-bold text-lg">
+                  {searchUser.firstName?.[0]}
+                </span>
               )}
             </div>
-            <span className="text-sm text-slate-500">@{user.username}</span>
-            {user.bio && (
-              <p className="text-sm text-slate-600 mt-1 line-clamp-2">{user.bio}</p>
-            )}
-            <div className="flex items-center space-x-4 text-sm text-slate-500 mt-2">
-              <span>{user.followerCount || 0} followers</span>
-              <span>{user.followingCount || 0} following</span>
-              <span>{user.postCount || 0} posts</span>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-semibold text-slate-900">
+                  {searchUser.firstName} {searchUser.lastName}
+                </span>
+                {searchUser.isVerified && (
+                  <span className="text-blue-500">✓</span>
+                )}
+              </div>
+              <span className="text-sm text-slate-500">@{searchUser.username}</span>
+              {searchUser.bio && (
+                <p className="text-sm text-slate-600 mt-1 line-clamp-2">{searchUser.bio}</p>
+              )}
+              <div className="flex items-center space-x-4 text-sm text-slate-500 mt-2">
+                <span>{searchUser.followerCount || 0} followers</span>
+                <span>{searchUser.followingCount || 0} following</span>
+                <span>{searchUser.postCount || 0} posts</span>
+              </div>
             </div>
           </div>
+          {(searchUser._id || searchUser.id) !== (user?.id || user?._id) && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const userId = searchUser._id || searchUser.id;
+                searchUser.isFollowing ? unfollowUserAction(userId) : followUserAction(userId);
+              }}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                searchUser.isFollowing
+                  ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
+            >
+              {searchUser.isFollowing ? 'Following' : 'Follow'}
+            </button>
+          )}
         </div>
-        {user.id !== user?.id && (
-          <button
-            onClick={() => user.isFollowing ? unfollowUserAction(user.id) : followUserAction(user.id)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              user.isFollowing
-                ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                : 'bg-indigo-600 text-white hover:bg-indigo-700'
-            }`}
-          >
-            {user.isFollowing ? 'Unfollow' : 'Follow'}
-          </button>
-        )}
-      </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 
   return (

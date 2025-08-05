@@ -89,12 +89,12 @@ const postSchema = new mongoose.Schema({
 
 // Virtual for like count
 postSchema.virtual('likeCount').get(function() {
-  return this.likes.length;
+  return this.likes?.length || 0;
 });
 
 // Virtual for comment count
 postSchema.virtual('commentCount').get(function() {
-  return this.comments.length;
+  return this.comments?.length || 0;
 });
 
 // Virtual for time ago

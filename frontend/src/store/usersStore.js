@@ -45,8 +45,8 @@ const useUsersStore = create((set, get) => ({
       // Update the user in search results to show they're now being followed
       set(state => ({
         searchResults: state.searchResults.map(user => 
-          user.id === userId 
-            ? { ...user, isFollowing: true, followerCount: user.followerCount + 1 }
+          (user._id === userId || user.id === userId)
+            ? { ...user, isFollowing: true, followerCount: (user.followerCount || 0) + 1 }
             : user
         )
       }));
@@ -66,8 +66,8 @@ const useUsersStore = create((set, get) => ({
       // Update the user in search results to show they're no longer being followed
       set(state => ({
         searchResults: state.searchResults.map(user => 
-          user.id === userId 
-            ? { ...user, isFollowing: false, followerCount: Math.max(0, user.followerCount - 1) }
+          (user._id === userId || user.id === userId)
+            ? { ...user, isFollowing: false, followerCount: Math.max(0, (user.followerCount || 0) - 1) }
             : user
         )
       }));

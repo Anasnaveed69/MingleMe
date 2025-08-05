@@ -5,6 +5,7 @@ import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import toast from 'react-hot-toast';
 import GradientBackground from '../../components/ui/GradientBackground';
+import ChatBubbleIcon from '../../components/ui/ChatBubbleIcon';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -12,12 +13,12 @@ const Login = () => {
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState('');
 
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -25,13 +26,9 @@ const Login = () => {
     }));
     
     // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+    if (error) {
+      setError('');
     }
-    clearError();
   };
 
   const validateForm = () => {
@@ -43,12 +40,17 @@ const Login = () => {
       newErrors.email = 'Please enter a valid email';
     }
 
-    if (!formData.password) {
+    if (!formData.password.trim()) {
       newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (Object.keys(newErrors).length > 0) {
+      setError(Object.values(newErrors)[0]);
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e) => {
@@ -86,7 +88,7 @@ const Login = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">M</span>
+            <ChatBubbleIcon size={32} animate={true} />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
           <p className="text-slate-600">Sign in to your account to continue</p>
@@ -116,17 +118,12 @@ const Login = () => {
                 id="email"
                 name="email"
                 value={formData.email}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 required
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                  errors.email ? 'border-red-300' : 'border-slate-300'
-                }`}
+                className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 placeholder="Enter your email"
               />
             </div>
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-            )}
           </div>
 
           {/* Password Field */}
@@ -141,11 +138,9 @@ const Login = () => {
                 id="password"
                 name="password"
                 value={formData.password}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 required
-                className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                  errors.password ? 'border-red-300' : 'border-slate-300'
-                }`}
+                className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 placeholder="Enter your password"
               />
               <button
@@ -156,9 +151,6 @@ const Login = () => {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-            )}
           </div>
 
           {/* Submit Button */}

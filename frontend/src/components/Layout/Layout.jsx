@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
 import { 
   Home, 
   User, 
   Search, 
-  Plus, 
+  Bell, 
   Menu, 
   X, 
   LogOut,
   Settings,
-  Bell
+  Plus
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useNotificationStore from '../../store/notificationStore';
 import NotificationDropdown from '../Notifications/NotificationDropdown';
+import ChatBubbleIcon from '../ui/ChatBubbleIcon';
+import { useEffect } from 'react';
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -59,7 +60,7 @@ const Layout = ({ children }) => {
             <div className="flex h-16 items-center justify-between px-6 border-b border-slate-200">
               <Link to="/feed" className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">M</span>
+                  <ChatBubbleIcon size={20} animate={true} />
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 bg-clip-text text-transparent">MingleMe</span>
               </Link>
@@ -131,7 +132,7 @@ const Layout = ({ children }) => {
           <div className="flex h-16 items-center px-6 border-b border-slate-200">
             <Link to="/feed" className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">M</span>
+                <ChatBubbleIcon size={20} animate={true} />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 bg-clip-text text-transparent">MingleMe</span>
             </Link>

@@ -169,6 +169,8 @@ router.post('/verify-otp', [
           firstName: user.firstName,
           lastName: user.lastName,
           avatar: user.avatar,
+          coverPhoto: user.coverPhoto,
+          bio: user.bio,
           isVerified: user.isVerified
         }
       }
@@ -288,6 +290,7 @@ router.get('/profile', protect, async (req, res) => {
           firstName: user.firstName,
           lastName: user.lastName,
           avatar: user.avatar,
+          coverPhoto: user.coverPhoto,
           bio: user.bio,
           isVerified: user.isVerified,
           followerCount: user.followerCount || 0,

@@ -44,18 +44,47 @@ router.get('/', protect, requireVerification, async (req, res) => {
     }
 
     const users = await User.find(query)
-      .select('username firstName lastName avatar bio followerCount followingCount postCount')
+      .select('username firstName lastName avatar bio isVerified')
+      .populate('followers', '_id')
+      .populate('following', '_id')
+      .populate('posts', '_id')
       .sort(search ? { score: { $meta: 'textScore' } } : { createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
       .lean();
+
+    // Process users to add follow status and counts
+    const processedUsers = users.map(user => {
+      const followerCount = user.followers ? user.followers.length : 0;
+      const followingCount = user.following ? user.following.length : 0;
+      const postCount = user.posts ? user.posts.length : 0;
+      
+      // Check if current user is following this user
+      const isFollowing = user.followers ? 
+        user.followers.some(follower => follower._id.toString() === req.user._id.toString()) : 
+        false;
+
+      return {
+        _id: user._id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        bio: user.bio,
+        isVerified: user.isVerified,
+        followerCount,
+        followingCount,
+        postCount,
+        isFollowing
+      };
+    });
 
     const total = await User.countDocuments(query);
 
     res.json({
       status: 'success',
       data: {
-        users,
+        users: processedUsers,
         total,
         page: parseInt(page),
         totalPages: Math.ceil(total / limit),
@@ -119,6 +148,7 @@ router.get('/:id', protect, requireVerification, async (req, res) => {
           firstName: user.firstName,
           lastName: user.lastName,
           avatar: user.avatar,
+          coverPhoto: user.coverPhoto,
           bio: user.bio,
           isVerified: user.isVerified,
           followerCount: user.followerCount,
