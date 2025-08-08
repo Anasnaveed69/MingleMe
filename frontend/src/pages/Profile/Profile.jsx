@@ -427,7 +427,10 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <GradientBackground variant="default" className="flex items-center justify-center">
+      <GradientBackground
+        variant="default"
+        className="flex items-center justify-center"
+      >
         <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
       </GradientBackground>
     );
@@ -442,7 +445,7 @@ const Profile = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-sm border overflow-hidden"
+          className=" bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-white dark:border-slate-900 overflow-hidden"
         >
           {/* Cover Photo */}
           <div className="h-48 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 relative overflow-hidden">
@@ -468,7 +471,7 @@ const Profile = () => {
             {/* Cover Photo Action Buttons */}
             <div className="absolute top-4 right-4 flex space-x-2">
               {currentUser?.coverPhoto && (
-                <button 
+                <button
                   onClick={handleRemoveCoverPhoto}
                   className="bg-red-500 hover:bg-red-600 backdrop-blur-sm text-white p-2.5 rounded-lg hover:shadow-lg transition-all duration-200 group border border-white/20"
                   disabled={removingCoverPhoto || uploadingCoverPhoto}
@@ -477,14 +480,14 @@ const Profile = () => {
                   <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 </button>
               )}
-              <button 
+              <button
                 onClick={() => coverPhotoInputRef.current?.click()}
                 className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2.5 rounded-lg hover:shadow-lg transition-all duration-200 group border border-white/20"
                 disabled={removingCoverPhoto || uploadingCoverPhoto}
                 title="Upload cover photo"
               >
                 <Camera className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </button>
+              </button>
             </div>
             <input
               ref={coverPhotoInputRef}
@@ -510,7 +513,7 @@ const Profile = () => {
                       />
                     ) : (
                       <span className="text-white text-4xl font-bold">
-                        {currentUser?.firstName?.[0] || 'U'}
+                        {currentUser?.firstName?.[0] || "U"}
                       </span>
                     )}
                     {uploadingAvatar && (
@@ -527,7 +530,7 @@ const Profile = () => {
                   {/* Avatar Action Buttons */}
                   <div className="absolute -bottom-2 -right-2 flex space-x-1">
                     {currentUser?.avatar && (
-                      <button 
+                      <button
                         onClick={handleRemoveAvatar}
                         className="bg-red-500 hover:bg-red-600 p-2.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 group border-2 border-white"
                         disabled={removingAvatar || uploadingAvatar}
@@ -536,14 +539,14 @@ const Profile = () => {
                         <Trash2 className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform" />
                       </button>
                     )}
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
                       className="bg-white hover:bg-gray-50 p-2.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 group border-2 border-white"
                       disabled={removingAvatar || uploadingAvatar}
                       title="Upload avatar"
-                  >
+                    >
                       <Camera className="w-4 h-4 text-slate-600 group-hover:scale-110 transition-transform" />
-                  </button>
+                    </button>
                   </div>
                   <input
                     ref={fileInputRef}
@@ -562,29 +565,49 @@ const Profile = () => {
                         <input
                           type="text"
                           value={profileData.firstName}
-                          onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
-                          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              firstName: e.target.value,
+                            })
+                          }
+                          className="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-100 px-3 py-2 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="First Name"
                         />
                         <input
                           type="text"
                           value={profileData.lastName}
-                          onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
-                          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              lastName: e.target.value,
+                            })
+                          }
+                          className="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-100 px-3 py-2 border border-slate-300  dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Last Name"
                         />
                       </div>
                       <input
                         type="text"
                         value={profileData.username}
-                        onChange={(e) => setProfileData({...profileData, username: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            username: e.target.value,
+                          })
+                        }
+                        className="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-100 w-full px-3 py-2 border border-slate-300  dark:border-slate-800  rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         placeholder="Username"
                       />
                       <textarea
                         value={profileData.bio}
-                        onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            bio: e.target.value,
+                          })
+                        }
+                        className="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-100 w-full px-3 py-2 border border-slate-300  dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
                         rows={3}
                         placeholder="Tell us about yourself..."
                       />
@@ -598,7 +621,7 @@ const Profile = () => {
                         </button>
                         <button
                           onClick={() => setEditing(false)}
-                          className="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-300 transition-colors flex items-center space-x-2"
+                          className="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-100 px-4 py-2 rounded-lg border  dark:border-slate-800 font-medium hover:bg-slate-300  dark:hover:bg-slate-500 transition-colors flex items-center space-x-2"
                         >
                           <X className="w-4 h-4" />
                           <span>Cancel</span>
@@ -607,12 +630,14 @@ const Profile = () => {
                     </div>
                   ) : (
                     <div>
-                      <h1 className="text-2xl font-bold text-slate-900">
+                      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                         {currentUser?.firstName} {currentUser?.lastName}
                       </h1>
                       <p className="text-slate-600">@{currentUser?.username}</p>
                       {currentUser?.bio && (
-                        <p className="text-slate-700 mt-2 max-w-md">{currentUser.bio}</p>
+                        <p className="text-slate-700 mt-2 max-w-md">
+                          {currentUser.bio}
+                        </p>
                       )}
                     </div>
                   )}
@@ -624,14 +649,10 @@ const Profile = () => {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => setEditing(true)}
-                    className="flex items-center space-x-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+                    className="flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-100 px-4 py-2 rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                   >
                     <Edit className="w-4 h-4" />
                     <span>Edit Profile</span>
-                  </button>
-                  <button className="flex items-center space-x-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-200 transition-colors">
-                    <Settings className="w-4 h-4" />
-                    <span>Settings</span>
                   </button>
                 </div>
               )}
@@ -640,7 +661,9 @@ const Profile = () => {
             {/* Stats */}
             <div className="flex space-x-8 mt-6 pt-6 border-t border-slate-100">
               <div className="text-center">
-                <div className="text-2xl font-bold text-slate-900">{posts.length}</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  {posts.length}
+                </div>
                 <div className="text-sm text-slate-600">Posts</div>
               </div>
               <button
@@ -648,7 +671,7 @@ const Profile = () => {
                 disabled={loadingFollowers}
                 className="text-center hover:opacity-80 transition-opacity disabled:opacity-50"
               >
-                <div className="text-2xl font-bold text-slate-900">
+                <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                   {currentUser?.followerCount || 0}
                 </div>
                 <div className="text-sm text-slate-600">Followers</div>
@@ -658,9 +681,9 @@ const Profile = () => {
                 disabled={loadingFollowing}
                 className="text-center hover:opacity-80 transition-opacity disabled:opacity-50"
               >
-                <div className="text-2xl font-bold text-slate-900">
+                <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                   {currentUser?.followingCount || 0}
-              </div>
+                </div>
                 <div className="text-sm text-slate-600">Following</div>
               </button>
             </div>
@@ -673,66 +696,74 @@ const Profile = () => {
           {posts.length > 0 ? (
             <div className="grid gap-4">
               {posts.map((post, index) => {
-                const isOwnPost = user?.id?.toString() === post.author?._id?.toString() || user?._id?.toString() === post.author?._id?.toString();
+                const isOwnPost =
+                  user?.id?.toString() === post.author?._id?.toString() ||
+                  user?._id?.toString() === post.author?._id?.toString();
                 const isLiked = post.isLiked || false;
-                
+
                 return (
-                <motion.div
-                  key={post._id || post.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                    className="bg-white rounded-xl shadow-sm border p-4 relative"
-                >
+                  <motion.div
+                    key={post._id || post.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-white dark:bg-slate-900 rounded-xl shadow-sm  p-4 relative"
+                  >
                     {/* Post Header */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center overflow-hidden">
-                      {post.author?.avatar ? (
-                        <img
-                          src={post.author.avatar}
-                          alt={post.author.firstName}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-white font-bold text-sm">
-                          {post.author?.firstName?.[0] || currentUser?.firstName?.[0]}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-500">
-                        {formatTimeAgo(post.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                      
+                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center overflow-hidden">
+                          {post.author?.avatar ? (
+                            <img
+                              src={post.author.avatar}
+                              alt={post.author.firstName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-slate-900 dark:text-slate-100 font-bold text-sm">
+                              {post.author?.firstName?.[0] ||
+                                currentUser?.firstName?.[0]}
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm text-slate-500">
+                            {formatTimeAgo(post.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+
                       {/* Post Menu */}
                       {isOwnPost && (
                         <div className="relative post-menu">
-                          <button 
+                          <button
                             onClick={() => {
                               // Toggle menu for this specific post
-                              setPosts(prev => prev.map(p => 
-                                p._id === post._id 
-                                  ? { ...p, showMenu: !p.showMenu }
-                                  : { ...p, showMenu: false }
-                              ));
+                              setPosts((prev) =>
+                                prev.map((p) =>
+                                  p._id === post._id
+                                    ? { ...p, showMenu: !p.showMenu }
+                                    : { ...p, showMenu: false }
+                                )
+                              );
                             }}
                             className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors"
                           >
                             <MoreHorizontal className="w-5 h-5" />
                           </button>
-                          
+
                           {/* Dropdown Menu */}
                           {post.showMenu && (
-                            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-500 border-t-0 border-r-0 border-l-0 border-b-1 border-solid border-gray-200 z-50">
+                              {" "}
                               <button
                                 onClick={() => {
                                   handlePostUpdate(post);
-                                  setPosts(prev => prev.map(p => ({ ...p, showMenu: false })));
+                                  setPosts((prev) =>
+                                    prev.map((p) => ({ ...p, showMenu: false }))
+                                  );
                                 }}
-                                className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
+                                className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors darkt:text-slate-100 dark:hover:bg-slate-100"
                               >
                                 <Edit className="w-4 h-4" />
                                 <span>Edit Post</span>
@@ -740,7 +771,9 @@ const Profile = () => {
                               <button
                                 onClick={() => {
                                   handlePostDelete(post._id);
-                                  setPosts(prev => prev.map(p => ({ ...p, showMenu: false })));
+                                  setPosts((prev) =>
+                                    prev.map((p) => ({ ...p, showMenu: false }))
+                                  );
                                 }}
                                 className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                               >
@@ -752,18 +785,20 @@ const Profile = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Post Content */}
-                  <p className="text-slate-900 mb-3">{post.content}</p>
-                  {post.images && post.images.length > 0 && (
-                    <div className="mb-3">
-                      <img
-                        src={post.images[0].url}
-                        alt="Post"
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
+                    <p className="text-slate-900 dark:text-slate-100 mb-3">
+                      {post.content}
+                    </p>
+                    {post.images && post.images.length > 0 && (
+                      <div className="mb-3">
+                        <img
+                          src={post.images[0].url}
+                          alt="Post"
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
 
                     {/* Post Actions */}
                     <div className="flex items-center justify-between mb-3">
@@ -771,29 +806,37 @@ const Profile = () => {
                         <button
                           onClick={() => handleLike(post._id)}
                           className={`flex items-center space-x-2 transition-colors ${
-                            isLiked 
-                              ? 'text-red-500' 
-                              : 'text-slate-500 hover:text-red-500'
+                            isLiked
+                              ? "text-red-500"
+                              : "text-slate-500 hover:text-red-500"
                           }`}
                         >
-                          <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                          <Heart
+                            className={`w-5 h-5 ${
+                              isLiked ? "fill-current" : ""
+                            }`}
+                          />
                           <span className="text-sm">{post.likeCount || 0}</span>
                         </button>
-                        
+
                         <button
                           onClick={() => {
-                            setPosts(prev => prev.map(p => 
-                              p._id === post._id 
-                                ? { ...p, showComments: !p.showComments }
-                                : p
-                            ));
+                            setPosts((prev) =>
+                              prev.map((p) =>
+                                p._id === post._id
+                                  ? { ...p, showComments: !p.showComments }
+                                  : p
+                              )
+                            );
                           }}
                           className="flex items-center space-x-2 text-slate-500 hover:text-indigo-500 transition-colors"
                         >
                           <MessageCircle className="w-5 h-5" />
-                          <span className="text-sm">{post.commentCount || 0}</span>
+                          <span className="text-sm">
+                            {post.commentCount || 0}
+                          </span>
                         </button>
-                        
+
                         <button
                           onClick={() => handleShare(post)}
                           className="flex items-center space-x-2 text-slate-500 hover:text-green-500 transition-colors"
@@ -821,14 +864,17 @@ const Profile = () => {
                       <div className="border-t border-slate-100">
                         {/* Comment Input */}
                         <div className="p-4 border-b border-slate-100">
-                          <form onSubmit={(e) => {
-                            e.preventDefault();
-                            const commentText = e.target.commentText.value;
-                            if (commentText.trim()) {
-                              handleComment(post._id, commentText);
-                              e.target.commentText.value = '';
-                            }
-                          }} className="flex space-x-2">
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              const commentText = e.target.commentText.value;
+                              if (commentText.trim()) {
+                                handleComment(post._id, commentText);
+                                e.target.commentText.value = "";
+                              }
+                            }}
+                            className="flex space-x-2"
+                          >
                             <input
                               type="text"
                               name="commentText"
@@ -848,59 +894,86 @@ const Profile = () => {
                         <div className="max-h-64 overflow-y-auto">
                           {post.comments && post.comments.length > 0 ? (
                             post.comments.map((comment) => (
-                              <div key={comment._id} className="p-4 border-b border-slate-50 last:border-b-0">
+                              <div
+                                key={comment._id}
+                                className="p-4 border-b border-slate-50 last:border-b-0"
+                              >
                                 <div className="flex items-start space-x-3">
                                   <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
                                     {comment.user?.avatar ? (
-                                      <img 
-                                        src={comment.user.avatar} 
-                                        alt={comment.user?.firstName || 'User'}
+                                      <img
+                                        src={comment.user.avatar}
+                                        alt={comment.user?.firstName || "User"}
                                         className="w-8 h-8 rounded-full object-cover"
                                       />
                                     ) : (
                                       <span className="text-white text-xs font-bold">
-                                        {comment.user?.firstName?.[0] || 'U'}
+                                        {comment.user?.firstName?.[0] || "U"}
                                       </span>
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center space-x-2 mb-1">
-                                      <span className="text-sm font-medium text-slate-900">
-                                        {comment.user?.firstName || 'Unknown'} {comment.user?.lastName || 'User'}
+                                      <span className="text-sm font-medium text-slate-900  dark:text-slate-100">
+                                        {comment.user?.firstName || "Unknown"}{" "}
+                                        {comment.user?.lastName || "User"}
                                       </span>
                                       <span className="text-xs text-slate-500">
                                         {formatTimeAgo(comment.createdAt)}
-                                        {comment.isEdited && <span className="ml-1">(edited)</span>}
+                                        {comment.isEdited && (
+                                          <span className="ml-1">(edited)</span>
+                                        )}
                                       </span>
                                     </div>
-                                    
-                                    <p className="text-sm text-slate-700 mb-2">{comment.content}</p>
-                                    
+
+                                    <p className="text-sm text-slate-700 mb-2">
+                                      {comment.content}
+                                    </p>
+
                                     <div className="flex items-center space-x-4">
                                       <button
-                                        onClick={() => handleLikeComment(post._id, comment._id)}
+                                        onClick={() =>
+                                          handleLikeComment(
+                                            post._id,
+                                            comment._id
+                                          )
+                                        }
                                         className={`flex items-center space-x-1 text-xs transition-colors ${
-                                          comment.isLiked 
-                                            ? 'text-indigo-600' 
-                                            : 'text-slate-500 hover:text-indigo-600'
+                                          comment.isLiked
+                                            ? "text-indigo-600"
+                                            : "text-slate-500 hover:text-indigo-600"
                                         }`}
                                       >
                                         <ThumbsUp className="w-3 h-3" />
                                         <span>{comment.likeCount || 0}</span>
                                       </button>
-                                      
-                                      {(user?.id?.toString() === comment.user?._id?.toString() || user?.id?.toString() === post.author?._id?.toString()) && (
+
+                                      {(user?.id?.toString() ===
+                                        comment.user?._id?.toString() ||
+                                        user?.id?.toString() ===
+                                          post.author?._id?.toString()) && (
                                         <div className="flex space-x-2">
-                                          {user?.id?.toString() === comment.user?._id?.toString() && (
+                                          {user?.id?.toString() ===
+                                            comment.user?._id?.toString() && (
                                             <button
-                                              onClick={() => handleEditComment(comment, post._id)}
+                                              onClick={() =>
+                                                handleEditComment(
+                                                  comment,
+                                                  post._id
+                                                )
+                                              }
                                               className="text-xs text-indigo-500 hover:text-indigo-700 transition-colors"
                                             >
                                               Edit
                                             </button>
                                           )}
                                           <button
-                                            onClick={() => handleDeleteComment(post._id, comment._id)}
+                                            onClick={() =>
+                                              handleDeleteComment(
+                                                post._id,
+                                                comment._id
+                                              )
+                                            }
                                             className="text-xs text-red-500 hover:text-red-700 transition-colors"
                                           >
                                             Delete
@@ -918,9 +991,9 @@ const Profile = () => {
                             </div>
                           )}
                         </div>
-                  </div>
+                      </div>
                     )}
-                </motion.div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -930,12 +1003,14 @@ const Profile = () => {
               animate={{ opacity: 1 }}
               className="text-center py-12 bg-white rounded-xl shadow-sm border"
             >
-              <p className="text-slate-500 text-lg">No posts yet. Start sharing your thoughts!</p>
+              <p className="text-slate-500 text-lg">
+                No posts yet. Start sharing your thoughts!
+              </p>
             </motion.div>
           )}
         </div>
       </div>
-      
+
       {/* Edit Post Modal */}
       <EditPostModal
         post={editingPost}
@@ -950,9 +1025,11 @@ const Profile = () => {
       {/* Likes Modal */}
       {showLikesModal && likesData && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full max-h-96 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-xl max-w-md w-full max-h-96 overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900">Likes</h3>
+              <h3 className="text-lg font-semibold text-slate-900  dark:text-slate-100">
+                Likes
+              </h3>
               <button
                 onClick={() => setShowLikesModal(false)}
                 className="text-slate-400 hover:text-slate-600"
@@ -962,22 +1039,25 @@ const Profile = () => {
             </div>
             <div className="max-h-80 overflow-y-auto">
               {likesData.likes.map((user) => (
-                <div key={user._id} className="flex items-center space-x-3 p-4 hover:bg-slate-50">
+                <div
+                  key={user._id}
+                  className="flex items-center space-x-3 p-4 hover:bg-slate-50 dark:hover:bg-slate-700 "
+                >
                   <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center">
                     {user.avatar ? (
-                      <img 
-                        src={user.avatar} 
+                      <img
+                        src={user.avatar}
                         alt={user.firstName}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                     ) : (
                       <span className="text-white font-bold">
-                        {user.firstName?.[0] || 'U'}
+                        {user.firstName?.[0] || "U"}
                       </span>
                     )}
                   </div>
                   <div>
-                    <div className="font-medium text-slate-900">
+                    <div className="font-medium text-slate-900  dark:text-slate-100">
                       {user.firstName} {user.lastName}
                     </div>
                     <p className="text-sm text-slate-500">@{user.username}</p>
@@ -1004,9 +1084,11 @@ const Profile = () => {
       {/* Followers Modal */}
       {showFollowersModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full max-h-96 overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full max-h-96 overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900">Followers</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                Followers
+              </h3>
               <button
                 onClick={() => setShowFollowersModal(false)}
                 className="text-slate-400 hover:text-slate-600"
@@ -1017,28 +1099,33 @@ const Profile = () => {
             <div className="max-h-80 overflow-y-auto">
               {followers.length > 0 ? (
                 followers.map((follower) => (
-                  <div key={follower._id} className="flex items-center space-x-3 p-4 hover:bg-slate-50">
+                  <div
+                    key={follower._id}
+                    className="flex items-center space-x-3 p-4 hover:bg-slate-50"
+                  >
                     <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center">
                       {follower.avatar ? (
-                        <img 
-                          src={follower.avatar} 
+                        <img
+                          src={follower.avatar}
                           alt={follower.firstName}
                           className="w-10 h-10 rounded-full object-cover"
                         />
                       ) : (
                         <span className="text-white font-bold">
-                          {follower.firstName?.[0] || 'U'}
+                          {follower.firstName?.[0] || "U"}
                         </span>
                       )}
                     </div>
                     <div>
-                      <Link 
+                      <Link
                         to={`/user/${follower._id}`}
-                        className="font-medium text-slate-900 hover:text-indigo-600 transition-colors"
+                        className="font-medium text-slate-900 dark:text-slate-100 hover:text-indigo-600 transition-colors"
                       >
                         {follower.firstName} {follower.lastName}
                       </Link>
-                      <p className="text-sm text-slate-500">@{follower.username}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-100">
+                        @{follower.username}
+                      </p>
                     </div>
                   </div>
                 ))
@@ -1055,9 +1142,11 @@ const Profile = () => {
       {/* Following Modal */}
       {showFollowingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full max-h-96 overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full max-h-96 overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900">Following</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                Following
+              </h3>
               <button
                 onClick={() => setShowFollowingModal(false)}
                 className="text-slate-400 hover:text-slate-600"
@@ -1068,28 +1157,33 @@ const Profile = () => {
             <div className="max-h-80 overflow-y-auto">
               {followingList.length > 0 ? (
                 followingList.map((following) => (
-                  <div key={following._id} className="flex items-center space-x-3 p-4 hover:bg-slate-50">
+                  <div
+                    key={following._id}
+                    className="flex items-center space-x-3 p-4 hover:bg-slate-50"
+                  >
                     <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center">
                       {following.avatar ? (
-                        <img 
-                          src={following.avatar} 
+                        <img
+                          src={following.avatar}
                           alt={following.firstName}
                           className="w-10 h-10 rounded-full object-cover"
                         />
                       ) : (
                         <span className="text-white font-bold">
-                          {following.firstName?.[0] || 'U'}
+                          {following.firstName?.[0] || "U"}
                         </span>
                       )}
                     </div>
                     <div>
-                      <Link 
+                      <Link
                         to={`/user/${following._id}`}
                         className="font-medium text-slate-900 hover:text-indigo-600 transition-colors"
                       >
                         {following.firstName} {following.lastName}
                       </Link>
-                      <p className="text-sm text-slate-500">@{following.username}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-100">
+                        @{following.username}
+                      </p>
                     </div>
                   </div>
                 ))

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
-import toast from 'react-hot-toast';
+
+// ...existing code...
 import GradientBackground from '../../components/ui/GradientBackground';
 import ChatBubbleIcon from '../../components/ui/ChatBubbleIcon';
+import toast from 'react-hot-toast';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -14,13 +16,14 @@ const Signup = () => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const { signup, isLoading, error, clearError } = useAuthStore();
+  const { signup } = useAuthStore();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -30,14 +33,13 @@ const Signup = () => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
+    // Clear specific error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: ''
       }));
     }
-    clearError();
   };
 
   const validateForm = () => {
@@ -55,8 +57,6 @@ const Signup = () => {
       newErrors.username = 'Username is required';
     } else if (formData.username.length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
-    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      newErrors.username = 'Username can only contain letters, numbers, and underscores';
     }
 
     if (!formData.email.trim()) {
@@ -65,13 +65,13 @@ const Signup = () => {
       newErrors.email = 'Please enter a valid email';
     }
 
-    if (!formData.password) {
+    if (!formData.password.trim()) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
-    if (!formData.confirmPassword) {
+    if (!formData.confirmPassword.trim()) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
@@ -86,24 +86,18 @@ const Signup = () => {
     
     if (!validateForm()) return;
 
+    setIsLoading(true);
+
     try {
-      const result = await signup({
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        username: formData.username.trim(),
-        email: formData.email.trim(),
-        password: formData.password
-      });
+      const result = await signup(formData);
       
       if (result.success) {
-        toast.success('Account created successfully! Please check your email for verification.');
-        // Add a small delay to ensure proper navigation
+        toast.success('Account created successfully!');
         setTimeout(() => {
           navigate('/verify-otp', { replace: true });
         }, 100);
       } else if (result.requiresVerification) {
-        // Handle case where verification is required
-        toast.success('Account created successfully! Please check your email for verification.');
+        toast.success('Account created! Please verify your email.');
         setTimeout(() => {
           navigate('/verify-otp', { replace: true });
         }, 100);
@@ -113,42 +107,33 @@ const Signup = () => {
     } catch (error) {
       console.error('Signup error:', error);
       toast.error('Signup failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <GradientBackground variant="default" className="flex items-center justify-center p-4">
+    <GradientBackground variant="auth" className="flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full"
+        className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8 max-w-md w-full border border-slate-200 dark:border-slate-700"
       >
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4">
             <ChatBubbleIcon size={32} animate={true} />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Join MingleMe</h1>
-          <p className="text-slate-600">Create your account to get started</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Join MingleMe</h1>
+          <p className="text-slate-600 dark:text-slate-400">Create your account to get started</p>
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
-          >
-            <p className="text-red-700 text-sm">{error}</p>
-          </motion.div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name Fields */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="firstName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 First Name
               </label>
               <input
@@ -158,17 +143,17 @@ const Signup = () => {
                 value={formData.firstName}
                 onChange={handleChange}
                 required
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                  errors.firstName ? 'border-red-300' : 'border-slate-300'
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 ${
+                  errors.firstName ? 'border-red-300 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                 }`}
                 placeholder="First name"
               />
               {errors.firstName && (
-                <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.firstName}</p>
               )}
             </div>
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="lastName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Last Name
               </label>
               <input
@@ -178,20 +163,20 @@ const Signup = () => {
                 value={formData.lastName}
                 onChange={handleChange}
                 required
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                  errors.lastName ? 'border-red-300' : 'border-slate-300'
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 ${
+                  errors.lastName ? 'border-red-300 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                 }`}
                 placeholder="Last name"
               />
               {errors.lastName && (
-                <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.lastName}</p>
               )}
             </div>
           </div>
 
           {/* Username Field */}
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-slate-700 mb-2">
+            <label htmlFor="username" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Username
             </label>
             <div className="relative">
@@ -203,20 +188,20 @@ const Signup = () => {
                 value={formData.username}
                 onChange={handleChange}
                 required
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                  errors.username ? 'border-red-300' : 'border-slate-300'
+                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 ${
+                  errors.username ? 'border-red-300 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                 }`}
                 placeholder="Choose a username"
               />
             </div>
             {errors.username && (
-              <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.username}</p>
             )}
           </div>
 
           {/* Email Field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Email Address
             </label>
             <div className="relative">
@@ -228,20 +213,20 @@ const Signup = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                  errors.email ? 'border-red-300' : 'border-slate-300'
+                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 ${
+                  errors.email ? 'border-red-300 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                 }`}
                 placeholder="Enter your email"
               />
             </div>
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
             )}
           </div>
 
           {/* Password Field */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Password
             </label>
             <div className="relative">
@@ -253,27 +238,27 @@ const Signup = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                  errors.password ? 'border-red-300' : 'border-slate-300'
+                className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 ${
+                  errors.password ? 'border-red-300 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                 }`}
                 placeholder="Create a password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
             {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
             )}
           </div>
 
           {/* Confirm Password Field */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-2">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Confirm Password
             </label>
             <div className="relative">
@@ -285,21 +270,21 @@ const Signup = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
-                  errors.confirmPassword ? 'border-red-300' : 'border-slate-300'
+                className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 ${
+                  errors.confirmPassword ? 'border-red-300 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                 }`}
                 placeholder="Confirm your password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
               >
                 {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>
             )}
           </div>
 
@@ -322,18 +307,18 @@ const Signup = () => {
 
         {/* Divider */}
         <div className="my-6 flex items-center">
-          <div className="flex-1 border-t border-slate-300"></div>
-          <span className="px-4 text-slate-500 text-sm">or</span>
-          <div className="flex-1 border-t border-slate-300"></div>
+          <div className="flex-1 border-t border-slate-300 dark:border-slate-600"></div>
+          <span className="px-4 text-slate-500 dark:text-slate-400 text-sm">or</span>
+          <div className="flex-1 border-t border-slate-300 dark:border-slate-600"></div>
         </div>
 
         {/* Login Link */}
         <div className="text-center">
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
             Already have an account?{' '}
             <Link
               to="/login"
-              className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+              className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors"
             >
               Sign in here
             </Link>

@@ -144,7 +144,7 @@ const CreatePost = ({ onPostCreated }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm border p-6 mb-6"
+    className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-700 p-6 mb-6"
     >
       <form onSubmit={handleSubmit}>
         {/* User Info */}
@@ -163,10 +163,10 @@ const CreatePost = ({ onPostCreated }) => {
             )}
           </div>
           <div>
-            <h3 className="font-semibold text-slate-900">
+            <h3 className="font-semibold text-white">
               {user?.firstName} {user?.lastName}
             </h3>
-            <p className="text-sm text-slate-500">@{user?.username}</p>
+            <p className="text-sm text-slate-400">@{user?.username}</p>
           </div>
         </div>
 
@@ -177,7 +177,7 @@ const CreatePost = ({ onPostCreated }) => {
             onChange={handleContentChange}
             onKeyPress={handleKeyPress}
             placeholder="What's on your mind?"
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all duration-200"
+          className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all duration-200 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             rows={3}
             maxLength={2000}
             disabled={submitting}

@@ -46,7 +46,7 @@ const Search = () => {
       key={post._id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg shadow-sm border p-4 mb-4 hover:shadow-md transition-shadow"
+      className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border  border-slate-100 dark:border-slate-800 p-4 mb-4 hover:shadow-md transition-shadow"
     >
       <div className="flex items-start space-x-3">
         <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-full flex items-center justify-center">
@@ -64,7 +64,7 @@ const Search = () => {
         </div>
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-2">
-            <span className="font-semibold text-slate-900">
+            <span className="font-semibold text-slate-900 dark:text-slate-100">
               {post.author?.firstName} {post.author?.lastName}
             </span>
             <span className="text-sm text-slate-500">@{post.author?.username}</span>
@@ -97,7 +97,7 @@ const Search = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border p-4 mb-4 hover:shadow-md transition-shadow cursor-pointer"
+        className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800 p-4 mb-4 hover:shadow-md transition-shadow cursor-pointer"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -116,7 +116,7 @@ const Search = () => {
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-slate-900 dark:text-slate-100">
                   {searchUser.firstName} {searchUser.lastName}
                 </span>
                 {searchUser.isVerified && (
@@ -177,31 +177,31 @@ const Search = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search for posts, users, or tags..."
-            className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+            className="bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-200 w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
           />
         </div>
       </div>
 
       {/* Search Tabs */}
       <div className="mb-6">
-        <div className="flex space-x-1 bg-slate-100 p-1 rounded-lg">
+        <div className="flex space-x-1 bg-slate-100  dark:bg-slate-900 p-1 rounded-lg">
           <button
-            onClick={() => setActiveTab('posts')}
+            onClick={() => setActiveTab("posts")}
             className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === 'posts'
-                ? 'bg-white text-indigo-600 shadow-sm'
-                : 'text-slate-600 hover:text-slate-800'
+              activeTab === "posts"
+                ? "bg-white dark:bg-slate-800 text-indigo-600 shadow-sm"
+                : "text-slate-600 dark:text-slate-100 hover:text-slate-800"
             }`}
           >
             <FileText className="w-4 h-4" />
             <span>Posts</span>
           </button>
           <button
-            onClick={() => setActiveTab('users')}
+            onClick={() => setActiveTab("users")}
             className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === 'users'
-                ? 'bg-white text-indigo-600 shadow-sm'
-                : 'text-slate-600 hover:text-slate-800'
+              activeTab === "users"
+                ? "bg-white  dark:bg-slate-800 text-indigo-600 shadow-sm"
+                : "text-slate-600 dark:text-slate-100  hover:text-slate-800"
             }`}
           >
             <Users className="w-4 h-4" />
@@ -212,32 +212,44 @@ const Search = () => {
 
       {/* Search Results */}
       <div>
-        {(activeTab === 'posts' ? postSearchLoading : userSearchLoading) ? (
+        {(activeTab === "posts" ? postSearchLoading : userSearchLoading) ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
             <p className="text-slate-600">Searching...</p>
           </div>
         ) : searchTerm.trim() ? (
-          (activeTab === 'posts' ? postResults : userResults).length > 0 ? (
+          (activeTab === "posts" ? postResults : userResults).length > 0 ? (
             <div>
               <p className="text-sm text-slate-600 mb-4">
-                Found {(activeTab === 'posts' ? postResults : userResults).length} result{(activeTab === 'posts' ? postResults : userResults).length !== 1 ? 's' : ''}
+                Found{" "}
+                {(activeTab === "posts" ? postResults : userResults).length}{" "}
+                result
+                {(activeTab === "posts" ? postResults : userResults).length !==
+                1
+                  ? "s"
+                  : ""}
               </p>
-              {activeTab === 'posts' && postResults.map(renderPostResult)}
-              {activeTab === 'users' && userResults.map(renderUserResult)}
+              {activeTab === "posts" && postResults.map(renderPostResult)}
+              {activeTab === "users" && userResults.map(renderUserResult)}
             </div>
           ) : (
             <div className="text-center py-8">
               <SearchIcon className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-              <p className="text-slate-600">No {activeTab} found for "{searchTerm}"</p>
-              <p className="text-sm text-slate-500 mt-2">Try different keywords or check your spelling</p>
+              <p className="text-slate-600">
+                No {activeTab} found for "{searchTerm}"
+              </p>
+              <p className="text-sm text-slate-500 mt-2">
+                Try different keywords or check your spelling
+              </p>
             </div>
           )
         ) : (
           <div className="text-center py-8">
             <SearchIcon className="w-12 h-12 text-slate-400 mx-auto mb-4" />
             <p className="text-slate-600">Start typing to search</p>
-            <p className="text-sm text-slate-500 mt-2">Search for posts, users, or tags</p>
+            <p className="text-sm text-slate-500 mt-2">
+              Search for posts, users, or tags
+            </p>
           </div>
         )}
       </div>

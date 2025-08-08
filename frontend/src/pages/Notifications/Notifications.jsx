@@ -93,38 +93,44 @@ const Notifications = () => {
     >
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center text-slate-900 dark:text-slate-100 justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              Notifications
+            </h1>
             <p className="text-slate-600 mt-1">
-              {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : 'All caught up!'}
+              {unreadCount > 0
+                ? `${unreadCount} unread notification${
+                    unreadCount !== 1 ? "s" : ""
+                  }`
+                : "All caught up!"}
             </p>
           </div>
           <div className="flex items-center space-x-3">
             {/* Filter Tabs */}
-            <div className="flex bg-slate-100 rounded-lg p-1">
+            <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
               <button
-                onClick={() => handleFilterChange('all')}
+                onClick={() => handleFilterChange("all")}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  filter === 'all'
-                    ? 'bg-white text-indigo-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-800'
+                  filter === "all"
+                    ? "bg-white  dark:bg-slate-800 text-indigo-600 shadow-sm"
+                    : "text-slate-600 hover:text-slate-800"
                 }`}
               >
                 All
               </button>
               <button
-                onClick={() => handleFilterChange('unread')}
+                onClick={() => handleFilterChange("unread")}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  filter === 'unread'
-                    ? 'bg-white text-indigo-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-800'
+                  filter === "unread"
+                    ? "bg-white  dark:bg-slate-800 text-indigo-600 shadow-sm"
+                    : "text-slate-600 dark:text-slate-100 hover:text-slate-800"
                 }`}
               >
                 Unread
               </button>
             </div>
-            
+
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
@@ -139,35 +145,38 @@ const Notifications = () => {
       </div>
 
       {/* Notifications List */}
-      <div className="bg-white rounded-lg shadow-sm border">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border-white dark:border-slate-800 shadow-sm border">
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p className="text-slate-600">Loading notifications...</p>
+            <p className="text-slate-600 dark:text-slate-100">
+              Loading notifications...
+            </p>
           </div>
         ) : notifications.length === 0 ? (
           <div className="p-8 text-center">
             <Bell className="w-12 h-12 text-slate-400 mx-auto mb-4" />
             <p className="text-slate-600 text-lg font-medium mb-2">
-              {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
+              {filter === "unread"
+                ? "No unread notifications"
+                : "No notifications yet"}
             </p>
             <p className="text-slate-500">
-              {filter === 'unread' 
-                ? 'You\'re all caught up!' 
-                : 'When you get notifications, they\'ll appear here'
-              }
+              {filter === "unread"
+                ? "You're all caught up!"
+                : "When you get notifications, they'll appear here"}
             </p>
           </div>
         ) : (
           <>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 dark:divide-slate-700 ">
               {notifications.map((notification) => (
                 <motion.div
                   key={notification._id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`p-4 hover:bg-slate-50 transition-colors ${
-                    !notification.read ? 'bg-indigo-50' : ''
+                  className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                    !notification.read ? "bg-indigo-50 dark:bg-slate-800" : ""
                   }`}
                 >
                   <div className="flex items-start space-x-4">
@@ -194,8 +203,9 @@ const Notifications = () => {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
-                        <span className="text-sm font-medium text-slate-900">
-                          {notification.sender?.firstName} {notification.sender?.lastName}
+                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                          {notification.sender?.firstName}{" "}
+                          {notification.sender?.lastName}
                         </span>
                         {!notification.read && (
                           <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
@@ -221,7 +231,9 @@ const Notifications = () => {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDeleteNotification(notification._id)}
+                        onClick={() =>
+                          handleDeleteNotification(notification._id)
+                        }
                         className="p-2 hover:bg-slate-200 rounded-lg transition-colors"
                         title="Delete notification"
                       >
