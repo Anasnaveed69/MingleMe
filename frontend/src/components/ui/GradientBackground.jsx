@@ -11,20 +11,20 @@ const GradientBackground = ({
     default: {
       light:"bg-gradient-to-br from-purple-600 to-teal-500 text-white px-6 py-3 rounded-lg font-medium transition-all duration-20",
 
-      dark: "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900",
+      dark: "bg-gradient-to-br from-purple-600 to-teal-500 text-white px-6 py-3 rounded-lg font-medium transition-all duration-20",
     },
 
     auth: {
-      light: "bg-gradient-to-br from-purple-600 to-teal-500 text-white px-6 py-3 rounded-lg font-medium transition-all duration-20",
-      dark: "bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900",
+      light: "bg-gradient-to-br from-purple-600 to-teal-500 text-white px-6 py-3 font-medium transition-all duration-20",
+      dark: "bg-gradient-to-br from-purple-600 to-teal-500 text-white px-6 py-3 font-medium transition-all duration-20",
     },
     feed: {
       light: "bg-gradient-to-br from-purple-600 to-teal-500 text-white px-6 py-3 rounded-lg font-medium transition-all duration-20",
-      dark: "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900",
+      dark: "bg-gradient-to-br from-purple-600 to-teal-500 text-white px-6 py-3 rounded-lg font-medium transition-all duration-20",
     },
     profile: {
       light: "bg-gradient-to-br from-purple-600 to-teal-500 text-white px-6 py-3 rounded-lg font-medium transition-all duration-20",
-      dark: "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900",
+      dark: "bg-gradient-to-br from-purple-600 to-teal-500 text-white px-6 py-3 rounded-lg font-medium transition-all duration-20",
     },
   };
 

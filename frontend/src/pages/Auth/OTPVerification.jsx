@@ -148,7 +148,7 @@ const OTPVerification = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full"
+        className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8 max-w-md w-full"
       >
         {/* Back Button */}
         <button
@@ -162,10 +162,10 @@ const OTPVerification = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Mail className="text-white w-8 h-8" />
+            <Mail className="text-slate-600 dark:text-white w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Verify Your Email</h1>
-          <p className="text-slate-600">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Verify Your Email</h1>
+          <p className="text-slate-500">
             We've sent a verification code to{' '}
             <span className="font-medium text-slate-900">{pendingVerificationEmail}</span>
           </p>
@@ -185,7 +185,7 @@ const OTPVerification = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* OTP Input */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-4 text-center">
+            <label className="block text-sm font-medium text-slate-500 dark:text-slate-100 mb-4 text-center">
               Enter the 6-digit code
             </label>
             <div className="flex justify-center space-x-2 mb-4">
@@ -198,7 +198,7 @@ const OTPVerification = () => {
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
-                  className={`w-12 h-12 text-center text-lg font-semibold border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
+                  className={`w-12 h-12 text-slate-800 text-center text-lg font-semibold border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
                     errors.otp ? 'border-red-300' : 'border-slate-300'
                   }`}
                   maxLength={1}
@@ -251,7 +251,7 @@ const OTPVerification = () => {
 
         {/* Help Text */}
         <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-          <p className="text-slate-600 text-sm text-center">
+          <p className="text-slate-500 text-sm text-center">
             Check your email inbox and spam folder. The code will expire in 10 minutes.
           </p>
         </div>

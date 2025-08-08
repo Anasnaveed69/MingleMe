@@ -30,9 +30,33 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// CORS configuration
+// CORS configuration - FIXED for Vercel deployment
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://frontend-weld-five-iqtpf62kvz.vercel.app',
+  'https://frontend-alpha-blue-80.vercel.app',
+  'https://frontend-*.vercel.app',
+  'https://mingle-me.vercel.app',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.some(allowed => {
+      if (allowed && allowed.includes('*')) {
+        const regex = new RegExp(allowed.replace('*', '.*'));
+        return regex.test(origin);
+      }
+      return allowed === origin;
+    })) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
