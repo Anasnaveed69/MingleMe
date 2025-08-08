@@ -1001,9 +1001,9 @@ const Profile = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-12 bg-white rounded-xl shadow-sm border"
+              className="text-center py-12 bg-white dark:bg-slate-900 rounded-xl shadow-sm border"
             >
-              <p className="text-slate-500 text-lg">
+              <p className="text-slate-500 dark:text-slate-100 text-lg">
                 No posts yet. Start sharing your thoughts!
               </p>
             </motion.div>

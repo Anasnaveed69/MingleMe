@@ -395,16 +395,16 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
 
         {/* Comments Section */}
         {showComments && (
-          <div className="border-t border-slate-100">
+          <div className="border-t  text-slate-70">
             {/* Comment Input */}
-            <div className="p-4 border-b border-slate-100">
-              <form onSubmit={handleComment} className="flex space-x-2">
+            <div className="p-4  border-slate-100 border-b border-slate-100">
+              <form onSubmit={handleComment} className=" text-slate-700 flex space-x-2">
                 <input
                   type="text"
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Write a comment..."
-                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="flex-1 px-3 text-slate-700 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   disabled={submittingComment}
                 />
                 <button
